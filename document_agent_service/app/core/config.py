@@ -19,9 +19,10 @@ class Settings(BaseSettings):
     storage_dir: str = "./storage"
     chroma_persist_root: str = ""
 
-    ollama_base_url: str = "http://127.0.0.1:11434"
-    ollama_chat_model: str = "llama3.1:8b"
-    ollama_embed_model: str = "nomic-embed-text:latest"
+    # OpenAI Configuration
+    openai_api_key: str = ""
+    openai_chat_model: str = "gpt-4o-mini"
+    openai_embed_model: str = "text-embedding-3-small"
 
     jwt_secret: str = "dev-secret"
     jwt_algorithm: str = "HS256"

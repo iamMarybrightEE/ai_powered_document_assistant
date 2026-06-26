@@ -9,7 +9,7 @@ from docx import Document as DocxDocument
 from langchain_chroma import Chroma
 from langchain_core.documents import Document as LangchainDocument
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_ollama import ChatOllama, OllamaEmbeddings
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
 from sqlalchemy import delete, select
@@ -206,9 +206,9 @@ def run_indexing_job(db: Session, document_id: str) -> int:
     run_chroma_path = base_chroma_path / f"run_{uuid.uuid4().hex[:8]}"
     run_chroma_path.mkdir(parents=True, exist_ok=True)
 
-    embedding = OllamaEmbeddings(
-        model=settings.ollama_embed_model,
-        base_url=settings.ollama_base_url,
+    embedding = OpenAIEmbeddings(
+        model=settings.openai_embed_model,
+        api_key=settings.openai_api_key,
     )
 
     try:
@@ -273,9 +273,9 @@ def answer_with_rag(db: Session, session_id: str, message: str, top_k: int) -> t
         return err, []
 
     chroma_path = latest_chroma_dir_for_document(session.document_id).resolve()
-    llm = ChatOllama(
-        model=settings.ollama_chat_model,
-        base_url=settings.ollama_base_url,
+    llm = ChatOpenAI(
+        model=settings.openai_chat_model,
+        api_key=settings.openai_api_key,
         temperature=0,
     )
 
@@ -293,9 +293,9 @@ def answer_with_rag(db: Session, session_id: str, message: str, top_k: int) -> t
         db.commit()
         return err, []
 
-    embeddings = OllamaEmbeddings(
-        model=settings.ollama_embed_model,
-        base_url=settings.ollama_base_url,
+    embeddings = OpenAIEmbeddings(
+        model=settings.openai_embed_model,
+        api_key=settings.openai_api_key,
     )
 
     citations: list[dict] = []
@@ -333,8 +333,8 @@ def answer_with_rag(db: Session, session_id: str, message: str, top_k: int) -> t
             answer = result.content if hasattr(result, "content") else str(result)
         except Exception as exc2:
             answer = (
-                "The document assistant could not reach Ollama. Ensure Ollama is running and models "
-                f"`{settings.ollama_chat_model}` and `{settings.ollama_embed_model}` are available. "
+                "The document assistant could not reach OpenAI. Ensure your API key is valid and has access to "
+                f"model `{settings.openai_chat_model}`. "
                 f"Details: {exc2!s}"
             )
 
@@ -370,9 +370,9 @@ def generate_document_summary(db: Session, document_id: str) -> tuple[str | None
     # Take first 3000 chars for summary to avoid token limits
     text_excerpt = text[:3000]
 
-    llm = ChatOllama(
-        model=settings.ollama_chat_model,
-        base_url=settings.ollama_base_url,
+    llm = ChatOpenAI(
+        model=settings.openai_chat_model,
+        api_key=settings.openai_api_key,
         temperature=0,
     )
 

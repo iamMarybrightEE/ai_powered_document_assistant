@@ -407,7 +407,7 @@ export default function DocumentAssistant({
         )}
         {!uploadedFilename && (
           <Typography variant="caption" sx={{ color: "#999" }}>
-            Maximum 50MB
+            Maximum 1MB
           </Typography>
         )}
         {uploading && <CircularProgress size={20} sx={{ mt: 1, color: "#004497" }} />}
